@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+data/raw/*
+data/processed/*
+results/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!results/.gitkeep
+spark-warehouse/
+metastore_db/
+derby.log
+.env
+*.key
+secrets/

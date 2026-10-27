@@ -1,0 +1,11 @@
+pyspark==3.5.1
+presidio-analyzer==2.2.355
+presidio-anonymizer==2.2.355
+spacy==3.7.5
+datasets==2.20.0
+pandas==2.2.2
+pyarrow==16.1.0
+scikit-learn==1.5.1
+matplotlib==3.9.1
+jupyter==1.0.0
+pytest==8.3.2
