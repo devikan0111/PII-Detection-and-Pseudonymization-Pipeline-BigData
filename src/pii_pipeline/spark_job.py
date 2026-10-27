@@ -38,7 +38,12 @@ def main():
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--text-col", default="source_text")
     a = p.parse_args()
-    spark = SparkSession.builder.appName("pii-pseudonymization").master(os.environ.get("SPARK_MASTER", "local[*]")).getOrCreate()
+    opts = "-Dio.netty.tryReflectionSetAccessible=true"
+    spark = (SparkSession.builder.appName("pii-pseudonymization")
+             .master(os.environ.get("SPARK_MASTER", "local[*]"))
+             .config("spark.driver.extraJavaOptions", opts)
+             .config("spark.executor.extraJavaOptions", opts)
+             .getOrCreate())
     df = spark.read.parquet(a.input)
     if a.limit:
         df = df.limit(a.limit)
