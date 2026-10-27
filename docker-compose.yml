@@ -1,0 +1,15 @@
+services:
+  pipeline:
+    build: .
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    environment:
+      - PSEUDO_SECRET=${PSEUDO_SECRET:-change-me-for-real-runs}
+      - SPARK_MASTER=${SPARK_MASTER:-local[*]}
+  notebook:
+    build: .
+    command: jupyter notebook --ip=0.0.0.0 --allow-root --no-browser --notebook-dir=/app/notebooks
+    ports: ["8888:8888"]
+    volumes:
+      - ./:/app
