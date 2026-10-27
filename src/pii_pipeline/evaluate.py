@@ -210,7 +210,6 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
     m = sub.add_parser("metrics"); m.add_argument("--n", type=int, default=1000); m.add_argument("--seed", type=int, default=42)
     m.add_argument("--mode", choices=["baseline", "tuned"], default="baseline")
-    m.add_argument("--mode", choices=["baseline", "tuned"], default="baseline")
     t = sub.add_parser("throughput"); t.add_argument("--n", type=int, default=2000); t.add_argument("--seed", type=int, default=42)
     t.add_argument("--cores", type=int, nargs="+", default=[1, 2, 4])
     a = p.parse_args()
