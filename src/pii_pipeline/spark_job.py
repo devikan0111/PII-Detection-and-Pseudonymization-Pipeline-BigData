@@ -1,5 +1,5 @@
 """Spark pipeline: detect PII with Presidio, pseudonymize, write output.
-Skeleton - fill in TODOs as you build."""
+Use PII_DETECTOR_MODE=baseline or tuned to select detection rules."""
 import argparse, hmac, hashlib, os
 import pandas as pd
 from pyspark.sql import SparkSession
@@ -13,17 +13,12 @@ def token(entity_type: str, value: str) -> str:
     h = hmac.new(SECRET, f"{entity_type}:{value}".encode(), hashlib.sha256).hexdigest()[:10]
     return f"<{entity_type}_{h}>"
 
-_analyzer = None
-def get_analyzer():
-    global _analyzer  # one Presidio engine per executor process
-    if _analyzer is None:
-        from presidio_analyzer import AnalyzerEngine
-        _analyzer = AnalyzerEngine()
-    return _analyzer
-
 def pseudonymize_text(text: str) -> str:
-    results = sorted(get_analyzer().analyze(text=text, language="en",
-             entities=["PERSON", "PHONE_NUMBER", "EMAIL_ADDRESS"]), key=lambda r: r.start, reverse=True)
+    if not isinstance(text, str) or not text:
+        return text
+    from pii_pipeline.detect import detect, resolve_overlaps
+    mode = os.environ.get("PII_DETECTOR_MODE", "baseline")
+    results = resolve_overlaps(detect(text, mode=mode))
     for r in results:
         text = text[:r.start] + token(r.entity_type, text[r.start:r.end]) + text[r.end:]
     return text
