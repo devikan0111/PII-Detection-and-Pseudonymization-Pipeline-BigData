@@ -1,10 +1,11 @@
 """Evaluate PII detection quality and Spark throughput.
 
 Run from the repo root with PYTHONPATH=src:
-  python -m pii_pipeline.evaluate metrics --n 1000
+  python -m pii_pipeline.evaluate metrics --n 1000 --mode baseline
+  python -m pii_pipeline.evaluate metrics --n 1000 --mode tuned
   python -m pii_pipeline.evaluate throughput --n 2000 --cores 1 2 4
 
-metrics    -> results/metrics.csv, results/error_examples.csv
+metrics    -> results/metrics_<mode>.csv, results/error_examples_<mode>.csv
 throughput -> results/throughput.csv
 Only English rows of ai4privacy (synthetic data) are used.
 """
@@ -124,9 +125,8 @@ def load_english(n, seed):
 
 
 def cmd_metrics(a):
-    from presidio_analyzer import AnalyzerEngine
+    from pii_pipeline.detect import detect
     df = load_english(a.n, a.seed)
-    analyzer = AnalyzerEngine()
 
     unmapped = {}
     for pm in df["privacy_mask"]:
@@ -140,8 +140,7 @@ def cmd_metrics(a):
     t0 = time.perf_counter()
     for text, pm in zip(df["source_text"], df["privacy_mask"]):
         gold = gold_spans(pm)
-        pred = [(r.start, r.end, r.entity_type)
-                for r in analyzer.analyze(text=text, language="en", entities=ENTITIES)]
+        pred = [(r.start, r.end, r.entity_type) for r in detect(text, mode=a.mode)]
         scores.append(score_doc(gold, pred))
         if len(errors) < 200:
             for s, e, t in gold:   # missed (leaked) PII
@@ -154,11 +153,12 @@ def cmd_metrics(a):
 
     RESULTS.mkdir(exist_ok=True)
     table = to_table(aggregate(scores))
-    table.to_csv(RESULTS / "metrics.csv", index=False)
-    pd.DataFrame(errors).to_csv(RESULTS / "error_examples.csv", index=False)
+    table.to_csv(RESULTS / f"metrics_{a.mode}.csv", index=False)
+    pd.DataFrame(errors, columns=["kind", "entity", "value", "text"]).to_csv(
+        RESULTS / f"error_examples_{a.mode}.csv", index=False)
     print(table.to_string(index=False))
     print(f"\n{len(df)} English documents, {secs:.1f}s single-process ({len(df)/secs:.1f} docs/s)")
-    print("Saved results/metrics.csv and results/error_examples.csv")
+    print(f"Saved results/metrics_{a.mode}.csv and results/error_examples_{a.mode}.csv")
 
 
 # ---------- throughput command ----------
@@ -172,7 +172,7 @@ def write_parts(df, out_dir, parts):
 
 
 def run_spark(cores, in_dir, out_dir):
-    env = {**os.environ, "SPARK_MASTER": f"local[{cores}]"}
+    env = {**os.environ, "SPARK_MASTER": f"local[{cores}]", "PII_DETECTOR_MODE": "baseline"}
     cmd = [sys.executable, "-m", "pii_pipeline.spark_job", "--input", str(in_dir), "--output", str(out_dir)]
     t0 = time.perf_counter()
     p = subprocess.run(cmd, env=env, capture_output=True, text=True)
@@ -209,6 +209,8 @@ def main():
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="cmd", required=True)
     m = sub.add_parser("metrics"); m.add_argument("--n", type=int, default=1000); m.add_argument("--seed", type=int, default=42)
+    m.add_argument("--mode", choices=["baseline", "tuned"], default="baseline")
+    m.add_argument("--mode", choices=["baseline", "tuned"], default="baseline")
     t = sub.add_parser("throughput"); t.add_argument("--n", type=int, default=2000); t.add_argument("--seed", type=int, default=42)
     t.add_argument("--cores", type=int, nargs="+", default=[1, 2, 4])
     a = p.parse_args()
