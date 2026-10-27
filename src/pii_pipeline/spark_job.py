@@ -35,10 +35,13 @@ def pseudonymize_udf(texts: pd.Series) -> pd.Series:
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--input", required=True); p.add_argument("--output", required=True)
+    p.add_argument("--limit", type=int, default=None)
     p.add_argument("--text-col", default="source_text")
     a = p.parse_args()
     spark = SparkSession.builder.appName("pii-pseudonymization").master(os.environ.get("SPARK_MASTER", "local[*]")).getOrCreate()
     df = spark.read.parquet(a.input)
+    if a.limit:
+        df = df.limit(a.limit)
     df.withColumn("pseudonymized", pseudonymize_udf(df[a.text_col])).write.mode("overwrite").parquet(a.output)
 
 if __name__ == "__main__":
