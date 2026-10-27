@@ -62,6 +62,29 @@ def score_doc(gold, pred):
         ]
         hit = len(set(p) & set(g))
         res[("exact", ent)] = [len(p), hit, len(g), hit]
+
+        # Maximum one-to-one overlap matching: each span is used at most once.
+        edges = [
+            [j for j, gold_span in enumerate(g) if _overlap(pred_span, gold_span)]
+            for pred_span in p
+        ]
+        matched = {}
+
+        def assign(i, seen):
+            for j in edges[i]:
+                if j in seen:
+                    continue
+                seen.add(j)
+                if j not in matched or assign(matched[j], seen):
+                    matched[j] = i
+                    return True
+            return False
+
+        for i in range(len(p)):
+            assign(i, set())
+
+        hits = len(matched)
+        res[("one_to_one", ent)] = [len(p), hits, len(g), hits]
     return res
 
 
@@ -77,7 +100,7 @@ def aggregate(per_doc_scores):
 
 def to_table(total):
     rows = []
-    for mode in ("overlap", "exact"):
+    for mode in ("overlap", "exact", "one_to_one"):
         sums = [0, 0, 0, 0]
         for ent in ENTITIES + ["ALL"]:
             v = sums if ent == "ALL" else total.get((mode, ent), [0, 0, 0, 0])

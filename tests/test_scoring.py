@@ -28,3 +28,11 @@ def test_table_precision_recall():
     t = to_table(aggregate([score_doc(gold, pred)]))
     row = t[(t["mode"] == "exact") & (t["entity"] == "PERSON")].iloc[0]
     assert row["precision"] == 0.5 and row["recall"] == 0.5
+
+
+def test_one_to_one_prevents_double_counting():
+    gold = [(0, 6, "PERSON"), (7, 12, "PERSON")]
+    pred = [(0, 12, "PERSON")]
+    scores = score_doc(gold, pred)
+    assert scores[("overlap", "PERSON")] == [1, 1, 2, 2]
+    assert scores[("one_to_one", "PERSON")] == [1, 1, 2, 1]
