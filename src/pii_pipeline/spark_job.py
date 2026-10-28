@@ -6,7 +6,14 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import StringType
 
-SECRET = os.environ.get("PSEUDO_SECRET", "change-me").encode()
+secret_value = os.environ.get("PSEUDO_SECRET")
+
+if not secret_value:
+    raise RuntimeError(
+        "PSEUDO_SECRET environment variable must be set."
+    )
+
+SECRET = secret_value.encode()
 
 def token(entity_type: str, value: str) -> str:
     """Keyed, deterministic pseudonym (HMAC) so the same person maps to the same token."""

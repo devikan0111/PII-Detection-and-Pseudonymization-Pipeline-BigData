@@ -1,3 +1,6 @@
+import os
+
+os.environ.setdefault("PSEUDO_SECRET", "test-only-secret-for-unit-tests")
 from pii_pipeline.spark_job import token
 
 def test_deterministic():
