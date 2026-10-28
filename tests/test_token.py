@@ -88,3 +88,27 @@ def test_missed_pii_analysis():
 
     assert result.iloc[1]["missed_pii"] == 0
     assert result.iloc[1]["miss_rate_percent"] == 0.0
+def test_linkage_attack():
+    import pandas as pd
+    from pii_pipeline.reidentify import linkage_attack
+
+    pseudo = pd.DataFrame([
+        {"token": "P001", "city": "Bengaluru", "age": 27, "job": "Architect"},
+        {"token": "P002", "city": "Mysuru", "age": 35, "job": "Teacher"},
+        {"token": "P003", "city": "Bengaluru", "age": 27, "job": "Engineer"},
+    ])
+
+    auxiliary = pd.DataFrame([
+        {"name": "Alice", "city": "Bengaluru", "age": 27, "job": "Architect"},
+        {"name": "Bob", "city": "Mysuru", "age": 35, "job": "Teacher"},
+        {"name": "Charlie", "city": "Bengaluru", "age": 27, "job": "Engineer"},
+        {"name": "David", "city": "Bengaluru", "age": 27, "job": "Engineer"},
+    ])
+
+    unique, total, rate = linkage_attack(
+        pseudo, auxiliary, ["city", "age", "job"]
+    )
+
+    assert unique == 2
+    assert total == 3
+    assert round(rate, 1) == 66.7
