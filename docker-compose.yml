@@ -5,7 +5,7 @@ services:
       - ./data:/app/data
       - ./results:/app/results
     environment:
-      - PSEUDO_SECRET=${PSEUDO_SECRET:-change-me-for-real-runs}
+      - PSEUDO_SECRET=${PSEUDO_SECRET:?Set PSEUDO_SECRET before running Docker Compose}
       - SPARK_MASTER=${SPARK_MASTER:-local[*]}
   notebook:
     build: .
