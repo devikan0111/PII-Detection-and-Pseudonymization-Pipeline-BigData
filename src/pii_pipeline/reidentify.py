@@ -51,6 +51,42 @@ def missed_pii_analysis(metrics):
          "missed_pii", "miss_rate_percent"]
     ]
 
+def linkage_attack(pseudo, auxiliary, quasi_identifiers):
+    """Measure unique identity matches using quasi-identifiers."""
+
+    matches = pseudo.merge(
+        auxiliary,
+        on=quasi_identifiers,
+        how="left",
+        indicator=True
+    )
+
+    # Count how many auxiliary identities match each combination.
+    match_counts = (
+        auxiliary.groupby(quasi_identifiers)
+        .size()
+        .reset_index(name="candidate_count")
+    )
+
+    matches = matches.merge(
+        match_counts,
+        on=quasi_identifiers,
+        how="left"
+    )
+
+    # Only one matching auxiliary identity means a unique match.
+    uniquely_matched = (
+        (matches["_merge"] == "both") &
+        (matches["candidate_count"] == 1)
+    )
+
+    unique_tokens = matches.loc[uniquely_matched, "token"].nunique()
+    total = len(pseudo)
+
+    rate = 100 * unique_tokens / total if total else 0.0
+
+    return unique_tokens, total, rate
+
 def main():
     original = "alice@example.com"
     correct_key = b"experiment-only-secret"
