@@ -19,7 +19,7 @@ def pseudonymize_text(text: str) -> str:
     from pii_pipeline.detect import detect, resolve_overlaps
     mode = os.environ.get("PII_DETECTOR_MODE", "baseline")
     results = resolve_overlaps(detect(text, mode=mode))
-    for r in results:
+    for r in sorted(results, key=lambda r: r.start, reverse=True):
         text = text[:r.start] + token(r.entity_type, text[r.start:r.end]) + text[r.end:]
     return text
 
