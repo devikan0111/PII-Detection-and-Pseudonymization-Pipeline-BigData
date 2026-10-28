@@ -1,0 +1,6 @@
+experiment,scenario,total,successful,rate_percent
+Dictionary attack,Correct secret key,5,4,80.0
+Dictionary attack,Incorrect secret key,5,0,0.0
+Missed PII detection,Baseline,654,199,30.43
+Missed PII detection,Tuned,654,159,24.31
+Linkage attack,Unique matches,3,2,66.67

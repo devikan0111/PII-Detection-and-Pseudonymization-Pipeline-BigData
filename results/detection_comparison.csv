@@ -1,0 +1,5 @@
+entity,precision_baseline,recall_baseline,f1_baseline,precision_tuned,recall_tuned,f1_tuned
+PERSON,0.6422,0.7171,0.6776,0.6422,0.7171,0.6776
+PHONE_NUMBER,0.4932,0.3462,0.4068,0.8444,0.7308,0.7835
+EMAIL_ADDRESS,1.0,1.0,1.0,1.0,1.0,1.0
+ALL,0.6721,0.6957,0.6837,0.7133,0.7569,0.7344

@@ -5,6 +5,21 @@ __pycache__/
 data/raw/*
 data/processed/*
 results/*
+# Allow final experimental results
+!results/metrics_baseline.csv
+!results/metrics_tuned.csv
+!results/detection_comparison.csv
+!results/detection_f1_comparison.png
+!results/detection_recall_comparison.png
+!results/throughput_10000.csv
+!results/throughput_10000_run2.csv
+!results/throughput_10000_run3.csv
+!results/spark_throughput_summary.csv
+!results/spark_throughput_comparison.png
+!results/security_experiments.csv
+!results/dictionary_attack.png
+!results/missed_pii.png
+!results/linkage_attack.png
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !results/.gitkeep
