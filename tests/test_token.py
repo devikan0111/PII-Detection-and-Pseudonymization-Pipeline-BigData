@@ -61,3 +61,30 @@ def test_dictionary_attack_success_rate():
 
     assert wrong_count == 0
     assert wrong_rate == 0.0
+
+def test_missed_pii_analysis():
+    import pandas as pd
+    from pii_pipeline.reidentify import missed_pii_analysis
+
+    metrics = pd.DataFrame([
+        {
+            "mode": "one_to_one",
+            "entity": "PERSON",
+            "gold": 100,
+            "found_gold": 75,
+        },
+        {
+            "mode": "one_to_one",
+            "entity": "EMAIL_ADDRESS",
+            "gold": 50,
+            "found_gold": 50,
+        },
+    ])
+
+    result = missed_pii_analysis(metrics)
+
+    assert result.iloc[0]["missed_pii"] == 25
+    assert result.iloc[0]["miss_rate_percent"] == 25.0
+
+    assert result.iloc[1]["missed_pii"] == 0
+    assert result.iloc[1]["miss_rate_percent"] == 0.0
