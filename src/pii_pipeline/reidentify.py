@@ -37,6 +37,20 @@ def evaluate_dictionary_attack(originals, candidates, correct_key, attacker_key)
 
     return successes, 100 * successes / len(originals) if originals else 0.0
 
+def missed_pii_analysis(metrics):
+    """Calculate missed PII counts using one-to-one evaluation."""
+    rows = metrics[metrics["mode"] == "one_to_one"].copy()
+
+    rows["missed_pii"] = rows["gold"] - rows["found_gold"]
+    rows["miss_rate_percent"] = (
+        100 * rows["missed_pii"] / rows["gold"]
+    ).round(2)
+
+    return rows[
+        ["entity", "gold", "found_gold",
+         "missed_pii", "miss_rate_percent"]
+    ]
+
 def main():
     original = "alice@example.com"
     correct_key = b"experiment-only-secret"
