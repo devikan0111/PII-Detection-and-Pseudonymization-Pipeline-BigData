@@ -4,6 +4,13 @@ A privacy-focused big data pipeline that detects personally identifiable informa
 
 **Project areas:** Big Data Systems and Responsible AI Engineering.
 
+## Team Details
+
+| Name | Branch / Section | SRN |
+|---|---|---|
+| Nakka Gopya | AIML – B Section | PES1UG24AM107 |
+| Devika N | AIML – B Section | PES1UG24AM080 |
+
 ## 1. Project Objectives
 
 - Detect personal information such as names, email addresses, and phone numbers.
